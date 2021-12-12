@@ -5,6 +5,9 @@
   "description": "Skull is a dead simple static markdown site generator.",
   "main": "index.js",
   "author": "Vivek, Rishi",
+  "scripts": {
+    "render": "node index.js"
+  },
   "license": "MIT",
   "dependencies": {
     "@gerhobbelt/markdown-it-prism": "^2.1.8-5",
@@ -14,6 +17,7 @@
     "markdown-it-front-matter": "^0.2.3",
     "markdown-it-prism": "^2.2.1",
     "prismjs": "^1.25.0",
-    "rehype-highlight": "^5.0.1"
+    "rehype-highlight": "^5.0.1",
+    "yaml": "^1.10.2"
   }
 }

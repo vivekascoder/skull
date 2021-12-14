@@ -1,22 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-  <!-- <link rel="stylesheet" href="../assets/prism.css"> -->
-  <link rel="stylesheet" href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="../assets/prism.css" />
 
-  <title>💀 Skull</title>
-</head>
-<body>
-  <div>
-      Hello, world!
-  </div>
-  <hr>
-  <div class="container">
-      
-<h2>Connecting to remote server.</h2>
+    <title>💀 Skull</title>
+  </head>
+  <body class="dark">
+    <style>
+      body {
+        max-width: 400px;
+        margin: 10px auto;
+      }
+      body.dark {
+        background-color: black;
+        color: white;
+      }
+      body.dark p {
+        color: rgb(223, 223, 223);
+      }
+      body.dark b {
+        color: white;
+      }
+      a {
+        color: purple;
+      }
+      .tag {
+        padding: 1px 5px;
+        font-style: italic;
+      }
+      img {
+        max-width: 100%;
+      }
+    </style>
+    <div class="container">
+<h1>Connecting to remote server.</h1>
 <p>There is one fucking thing wrong with NuxtJs, It's version was so stupid. I made my original website in Nuxt, the fucking nuxt compiler used to take forever to compile my fucking static site, who has that much time. The more stupid thing that happend was was the breaking changes in Nuxt3, Atleast they started to use Vite. I will probably never use Nuxt again. I will make this site with Next.Js, I think it's a better choice to use react than to fuck yourself with Vue versions.</p>
 <h3>Why should you care ?</h3>
 <ul>
@@ -27,10 +47,33 @@
 <h2>Why?</h2>
 <p>Because of my fucking job. I don't have time to make my fucking website. But it'll be soon done.
 This is <code>What it is</code></p>
+<h2>Code Example</h2>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> articles <span class="token operator">=</span> <span class="token keyword">await</span> fileSystemAPI<span class="token punctuation">.</span><span class="token function">getAllArticles</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+articles<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">article</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> articles<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> article <span class="token operator">=</span> articles<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">let</span> parsed <span class="token operator">=</span> <span class="token keyword">await</span> fileSystemAPI<span class="token punctuation">.</span><span class="token function">renderArticle</span><span class="token punctuation">(</span>article<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  allParsedArticles<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    title<span class="token operator">:</span> parsed<span class="token punctuation">.</span>frontMatter<span class="token punctuation">.</span>title<span class="token punctuation">,</span>
+    url<span class="token operator">:</span> path<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">"./"</span><span class="token punctuation">,</span> article<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token string">".md"</span><span class="token punctuation">,</span> <span class="token string">".html"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    description<span class="token operator">:</span> parsed<span class="token punctuation">.</span>frontMatter<span class="token punctuation">.</span>description<span class="token punctuation">,</span>
+    date<span class="token operator">:</span> parsed<span class="token punctuation">.</span>frontMatter<span class="token punctuation">.</span>date<span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// console.log(allParsedArticles);</span>
+<span class="token punctuation">}</span>
+</code></pre>
 <p><img src="https://placekitten.com/200/200" alt="Cat"></p>
-
-  </div>
-  <hr>
-
-</body>
+</div>
+    <div class="container">
+      <h3>🏷 Tags</h3>
+      <div>
+        
+        <span class="tag"> Bash </span>
+        
+        <span class="tag"> Linux </span>
+        
+      </div>
+    </div>
+  </body>
 </html>

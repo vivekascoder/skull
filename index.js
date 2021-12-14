@@ -1,45 +1,33 @@
-import path, { parse } from "path";
-import { promises as fs } from "fs";
+import fileSystemAPI from "./utils/fileSystemAPI.js";
+import parseMarkdown from "./utils/parseMarkdown.js";
+import path from "path";
 import ejs from "ejs";
-import MarkdownIt from "markdown-it";
-import prism from "markdown-it-prism";
-import frontMatter from "markdown-it-front-matter";
-import config from "./skull-config.js";
-import YAML from "yaml";
-import { parseMarkdown } from "./utils/parseMarkdown.js";
-import { getFilesIn } from "./utils/fileSystemAPI.js";
+import { promises as fs } from "fs";
 
-const md = MarkdownIt()
-  .use(frontMatter, (d) => {
-    console.log(YAML.parse(d));
-  })
-  .use(prism, {});
+let allParsedArticles = [];
 
-const rootDir = process.cwd();
-const buildDir = path.join(rootDir, config.buildDirectory);
-const articleDir = path.join(rootDir, config.contentDirectory, "articles");
-const articles = (await fs.readdir(articleDir)).filter((file) =>
-  file.endsWith(".md")
-);
+const renderAllArticles = async () => {
+  const articles = await fileSystemAPI.getAllArticles();
+  articles.map(async (article) => {});
+  for (let i = 0; i < articles.length; i++) {
+    let article = articles[i];
+    let parsed = await fileSystemAPI.renderArticle(article);
+    console.log(parsed);
+    allParsedArticles.push({
+      ...parsed.frontMatter,
+      url: path.join("./", article.replace(".md", ".html")),
+    });
+    // console.log(allParsedArticles);
+  }
+  ejs.renderFile(
+    "./app/index.ejs",
+    { articles: allParsedArticles },
+    async (err, str) => {
+      if (err) throw err;
+      await fs.writeFile("./build/index.html", str);
+    }
+  );
+};
 
-// Loop over all the articles and convert them to HTML
-// articles.map(async (file) => {
-//   const filePath = path.join(articleDir, file);
-//   const content = await fs.readFile(filePath, "utf8");
-//   const htmlContent = md.render(content);
-//   const htmlFileName = path.join(buildDir, file.replace(".md", ".html"));
-
-//   console.log(`Rendering ${file}...`);
-
-//   ejs.renderFile(
-//     path.join(rootDir, config.app.directory, config.app.baseTemplate),
-//     { content: htmlContent.toString() },
-//     {},
-//     async (err, str) => {
-//       await fs.writeFile(htmlFileName, str);
-//     }
-//   );
-//   console.log(`Compiled Project.`);
-// });
-
-console.log(await getFilesIn("./content/articles/"));
+await renderAllArticles();
+console.log("Parsed:", allParsedArticles);

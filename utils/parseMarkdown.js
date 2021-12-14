@@ -19,4 +19,6 @@ const parseMarkdown = (markdown) => {
   return { html: htmlContent.toString(), frontMatter: yamlContent };
 };
 
+const parse = { parseMarkdown };
+export default parse;
 export { parseMarkdown };

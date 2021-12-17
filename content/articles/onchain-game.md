@@ -1,19 +1,19 @@
 ---
-title: "Onchain Game in Tezos usin Random Number Oracal."
-description: "Learn how to use tezos to build a game where two people can put money and the winner will take all the money using random number oracal."
+title: "Onchain Game in Tezos usin Random Number Oracle."
+description: "Learn how to use tezos to build a game where two people can put money and the winner will take all the money using random number oracle."
 author: "Vivek Kumar"
 date: "2020-12-17"
 tags:
   - Tezos
   - Blockchain
-  - Oracal
+  - Oracle
 ---
 
-# Write a Game on Tezos using Random Number Oracal
+# Write a Game on Tezos using Random Number Oracle
 
-## What is Random Number Oracal?
+## What is Random Number Oracle?
 
-The random number oracal [Random Number Oracal](https://github.com/asbjornenge/tezos-randomizer) is a oracal that generate seed for the random number called entropy off chain using [Randomizer Service](https://github.com/asbjornenge/tezos-randomizer-service) off-chain. This entropy is combined with the timestamp to yield a truly random number.
+The random number oracle [Random Number Oracle](https://github.com/asbjornenge/tezos-randomizer) is a oracle that generate seed for the random number called entropy off chain using [Randomizer Service](https://github.com/asbjornenge/tezos-randomizer-service) off-chain. This entropy is combined with the timestamp to yield a truly random number.
 
 The entropy here is generated using `Math.random()` in JavaScript. Take a look at the snippet from the [Randomizer Service](https://github.com/asbjornenge/tezos-randomizer-service).
 
@@ -23,7 +23,7 @@ function genRandomNumber() {
 }
 ```
 
-Then `taquito` is used to set this entropy into the main oracal contract after regular interval of times using `setTimeOut`.
+Then `taquito` is used to set this entropy into the main oracle contract after regular interval of times using `setTimeOut`.
 
 ```js
 export async function setEntropy() {
@@ -43,7 +43,7 @@ const setEntropyLoop = async () => {
 };
 ```
 
-Then we can use `getRandomBetween()` from the actual oracal contract to get the random number.
+Then we can use `getRandomBetween()` from the actual oracle contract to get the random number.
 
 ```py
 @sp.onchain_view()
@@ -55,18 +55,18 @@ def getRandomBetween(self, params):
     sp.result(res)
 ```
 
-This is how the random number generator oracal works.
+This is how the random number generator oracle works.
 
 ## Write contract for the game.
 
-Let's create the Mockup for the Oracal contract to test, because while testing the
-onchain views you need to have a contract that has that view. We've also imported smartpy and created a variable to store the oracal address that we'll use later.
+Let's create the Mockup for the Oracle contract to test, because while testing the
+onchain views you need to have a contract that has that view. We've also imported smartpy and created a variable to store the oracle address that we'll use later.
 
 ```py
 import smartpy as sp
-ORACAL_ADDRESS=sp.address("KT1F3yK7z7AsYvLdHwiJmFnM8thtTHeuZWTf")
+ORACLE_ADDRESS=sp.address("KT1F3yK7z7AsYvLdHwiJmFnM8thtTHeuZWTf")
 
-class OracalMockup(sp.Contract):
+class OracleMockup(sp.Contract):
     def __init__(self):
         self.init()
 
@@ -82,15 +82,15 @@ Any user can call `createGame(_name, _money, _user1, _user2)` to create a new ga
 
 After creating the game users can call `joinGame(_name)` to join the game by paying `_money` amount of tezos.
 
-After both the players paid the money, anyone of them can call `playGame(_name)` to play the game which will call the oracal for the random number and based on that the winner will be decided.
+After both the players paid the money, anyone of them can call `playGame(_name)` to play the game which will call the oracle for the random number and based on that the winner will be decided.
 
 ### Storage of the game contract
 
-The storage consist of two things, first thing is the `oracalAddress` which is the address of the oracal contract and second thing is the `matches` which is a mapping of the game name to the game information. Take a look below to see the code.
+The storage consist of two things, first thing is the `oracleAddress` which is the address of the oracle contract and second thing is the `matches` which is a mapping of the game name to the game information. Take a look below to see the code.
 
 ```py
 self.init(
-    oracalAddress=_oracalAddress,
+    oracleAddress=_oracleAddress,
     matches = sp.big_map(
         l = {},
         tkey=sp.TString,
@@ -143,7 +143,7 @@ def payMatchFee(self, _name):
 ```
 
 3. Play Match entry point
-   This will be called by any one of the players of the game to play the game. It will call the call the oracal contract to get the random number and based on that the winner will be decided.
+   This will be called by any one of the players of the game to play the game. It will call the call the oracle contract to get the random number and based on that the winner will be decided.
 
 ```py
 @sp.entry_point
@@ -170,10 +170,10 @@ def playGame(self, _name):
     # game give all the money to one user.
     randomNo = sp.view(
             "getRandomBetween",
-            self.data.oracalAddress,
+            self.data.oracleAddress,
             sp.record(_from=sp.nat(1), _to=sp.nat(100)),
             sp.TNat
-        ).open_some('WRONG_ORACAL_CONTRACT')
+        ).open_some('WRONG_ORACLE_CONTRACT')
 
     sp.if randomNo <= sp.nat(50):
         # User1 won
@@ -188,7 +188,7 @@ def playGame(self, _name):
 You can now test this contract with the help of Mockup contract that we've created.
 
 ```py
-sp.add_compilation_target("Compile", RandomFeeder(_oracalAddress=ORACAL_ADDRESS))
+sp.add_compilation_target("Compile", RandomFeeder(_oracleAddress=ORACLE_ADDRESS))
 
 @sp.add_test(name="Test RandomFeeder")
 def test():
@@ -196,11 +196,11 @@ def test():
     user1 = sp.test_account("User1")
     user2 = sp.test_account("User2")
 
-    oracal = OracalMockup()
-    r = RandomFeeder(_oracalAddress=oracal.address)
+    oracle = OracleMockup()
+    r = RandomFeeder(_oracleAddress=oracle.address)
 
     scenario += r
-    scenario += oracal
+    scenario += oracle
     gameName = "game"
     r.createMatch(sp.record(_name=gameName, _money=sp.mutez(500000), _user1=user1.address, _user2=user2.address)).run(sender=user1)
 

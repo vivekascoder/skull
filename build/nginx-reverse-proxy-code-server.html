@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="../assets/prism.css" />
+
+    <title>💀 Skull</title>
+  </head>
+  <body class="dark">
+    <style>
+      body {
+        max-width: 400px;
+        margin: 10px auto;
+        padding: 1rem;
+      }
+      body.dark {
+        background-color: black;
+        color: white;
+      }
+      body.dark p {
+        color: rgb(223, 223, 223);
+      }
+      body.dark b {
+        color: white;
+      }
+      a {
+        color: purple;
+      }
+      .tag {
+        padding: 1px 5px;
+        font-style: italic;
+      }
+      img {
+        max-width: 100%;
+      }
+      [class*="language"] {
+        font-size: 0.8rem;
+      }
+      code {
+        color: green;
+      }
+    </style>
+    <div class="container">
+<h1>Setting up Code Server with Nginx reverse proxy.</h1>
+<p>The beginning part was already covered by me from my article and youtube video you can find the link below for them.</p>
+<p>Additional Code Server Settings: <a href="https://blog.divcorn.com/blog/additional-code-server-settings">Here</a></p>
+<p>Code Server Video: <a href="https://www.youtube.com/watch?v=YEuZPNza5Dg">Here</a></p>
+<p>You can subscribe me to get more knowledge about Full Stack and DevOps.</p>
+<h2>What is reverse proxy ?</h2>
+<p>Reverse proxy stands for proxying the requests from a domain to another domain or port. For example, you're running a development nodejs server on port 8000, and you want to access this <strong>Development</strong> server using a domain let's say <strong>nodejs.devserver.com</strong>, so at that stage you can use nginx to listen for the requests from the domain <strong>nodejs.devserver.com</strong>. And this is exactly what Reverse proxy does.</p>
+<h2>How to use reverse proxy with nginx ?</h2>
+<p>Here is an example for setting up reverse proxy with nginx.</p>
+<pre class="language-js"><code class="language-js">server <span class="token punctuation">{</span>
+	listen <span class="token number">80</span><span class="token punctuation">;</span>
+	server_name xyz<span class="token punctuation">.</span>example<span class="token punctuation">.</span>com<span class="token punctuation">;</span>
+
+	# Reverse Proxy<span class="token punctuation">.</span>
+	location <span class="token operator">/</span> <span class="token punctuation">{</span>
+	    proxy_pass http<span class="token operator">:</span><span class="token operator">/</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">localhost:8000</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Explaination</strong>: This config will listen for the requests from the domain xyz.example.com, and forwards these requests to localhost:8000.</p>
+<h3>Nginx Config for code-server.</h3>
+<pre class="language-js"><code class="language-js">server <span class="token punctuation">{</span>
+	listen <span class="token number">443</span> ssl http2<span class="token punctuation">;</span>
+	server_name code<span class="token punctuation">.</span>example<span class="token punctuation">.</span>com<span class="token punctuation">;</span>
+
+	# For <span class="token constant">SSL</span>
+	ssl_certificate <span class="token operator">/</span>etc<span class="token operator">/</span>letsencrypt<span class="token operator">/</span>live<span class="token operator">/</span>code<span class="token punctuation">.</span>example<span class="token punctuation">.</span>com<span class="token operator">/</span>fullchain<span class="token punctuation">.</span>pem<span class="token punctuation">;</span>
+	ssl_certificate_key <span class="token operator">/</span>etc<span class="token operator">/</span>letsencrypt<span class="token operator">/</span>live<span class="token operator">/</span>code<span class="token punctuation">.</span>example<span class="token punctuation">.</span>com<span class="token operator">/</span>privkey<span class="token punctuation">.</span>pem<span class="token punctuation">;</span>
+
+	# Reverse Proxy<span class="token punctuation">.</span>
+	location <span class="token operator">/</span> <span class="token punctuation">{</span>
+	    proxy_pass http<span class="token operator">:</span><span class="token operator">/</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">localhost:8000</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">;</span>
+      # Some required Headers<span class="token punctuation">.</span>
+      proxy_set_header Upgrade $http_upgrade<span class="token punctuation">;</span>
+      proxy_set_header Connection upgrade<span class="token punctuation">;</span>
+      proxy_set_header Accept<span class="token operator">-</span>Encoding gzip<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<h2>Steps to setup</h2>
+<ol>
+<li>Create nginx config.</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">vim</span> /etc/nginx/sites-available/reverseproxy
+</code></pre>
+<blockquote>
+<p>NOTE: You can place anything at <code>reverseproxy</code>.</p>
+</blockquote>
+<ol start="2">
+<li>Paste the above content.</li>
+<li>Save the file.</li>
+<li>Create symlink to activate the config.</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">ln</span> -s /etc/nginx/sites-available/reverseproxy  /etc/nginx/sites-enabled/reverseproxy
+</code></pre>
+<ol start="5">
+<li>Then you can create ssl certificate for your domain.</li>
+</ol>
+<ul>
+<li>Install CertBot</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> python3-certbot
+</code></pre>
+<ul>
+<li>Stop the nginx server</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl stop nginx.service
+</code></pre>
+<ul>
+<li>Create the certificate.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> certbot certonly --standalone --preferred-challenges http-01 -d code.example.com
+</code></pre>
+<ul>
+<li>Restart the nginx server.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl restart nginx.service
+</code></pre>
+<ol start="6">
+<li>You're all set up, now you can visit code server instance with your fav. domain.</li>
+</ol>
+<h2>The browser occupies a lot of space</h2>
+<p>Yeah, it does you can use the brave browser and install this application as PWA.</p>
+<blockquote>
+<p>NOTE: You will not be able to do it, if you have'nt created SSL certificate. because PWA is only for https websites.</p>
+</blockquote>
+<p>You can install as a PWA by clicking on this button.</p>
+<p><img src="assets/rev-proxy/pwa.png" alt="PWA button"></p>
+<h3>How does it look ?</h3>
+<p><img src="assets/rev-proxy/cs.png" alt="Code Server"></p>
+</div>
+    <div class="container">
+      <h3>🏷 Tags</h3>
+      <div>
+        
+        <span class="tag"> Bash </span>
+        
+        <span class="tag"> Linux </span>
+        
+        <span class="tag"> DevOps </span>
+        
+      </div>
+    </div>
+  </body>
+</html>

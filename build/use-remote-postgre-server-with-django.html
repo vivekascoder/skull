@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="../assets/prism.css" />
+
+    <title>💀 Skull</title>
+  </head>
+  <body class="dark">
+    <style>
+      body {
+        max-width: 400px;
+        margin: 10px auto;
+        padding: 1rem;
+      }
+      body.dark {
+        background-color: black;
+        color: white;
+      }
+      body.dark p {
+        color: rgb(223, 223, 223);
+      }
+      body.dark b {
+        color: white;
+      }
+      a {
+        color: purple;
+      }
+      .tag {
+        padding: 1px 5px;
+        font-style: italic;
+      }
+      img {
+        max-width: 100%;
+      }
+      [class*="language"] {
+        font-size: 0.8rem;
+      }
+      code {
+        color: green;
+      }
+    </style>
+    <div class="container">
+<h1>Create and Use an Remote Databse with Django.</h1>
+<h2>Connecting to remote server.</h2>
+<ul>
+<li>Connect using <code>ssh username@server_ip</code>
+<img src="assets/remote-db/1.png" alt="SSH"></li>
+<li>After Connecting you'll see something like this.
+<img src="assets/remote-db/2.png" alt="SSH"></li>
+</ul>
+<h2>Install PostgreSQL Databse</h2>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> postgresql postgresql-contrib
+</code></pre>
+<p><img src="assets/remote-db/3.png" alt="SSH"></p>
+<h2>Check the status of postgresql service.</h2>
+<ul>
+<li>You can check the status of postgresql service using.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl status postgresql
+</code></pre>
+<p><img src="assets/remote-db/4.png" alt="SSH"></p>
+<blockquote>
+<p>⚠️ If you don't know how to create a virtual machine, you
+can watch my videos on development using cloud computers on
+youtube with <a href="https://www.youtube.com/watch?v=mVZfD1PPdM0&amp;list=PLNbhERfMxgvFVUfwNZfV_ss8jB7-7Kc9c">Development Using Clout Computers</a></p>
+</blockquote>
+<h2>Setting Up remote PostgreSQL Database.</h2>
+<ul>
+<li>Open the <code>pg_hba.conf</code> file using the following command.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">vim</span> /etc/postgresql/12/main/pg_hba.conf
+</code></pre>
+<ul>
+<li>Append the following lines.</li>
+</ul>
+<pre><code>host    all             all              0.0.0.0/0                       md5
+host    all             all              ::/0                            md5
+</code></pre>
+<p><img src="assets/remote-db/5.png" alt="SSH"></p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">vim</span> /etc/postgresql/12/main/postgresql.conf
+</code></pre>
+<ul>
+<li>Change the <code>listen_address</code> to *</li>
+</ul>
+<pre><code>listen_addresses = '*'
+</code></pre>
+<p><img src="assets/remote-db/6.png" alt="SSH"></p>
+<h3>Creating the Databse and User</h3>
+<ul>
+<li>Open PostgreSQl with the following command.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> -u postgres psql
+</code></pre>
+<ul>
+<li>Create the Databse and User:</li>
+</ul>
+<pre class="language-bash"><code class="language-bash">CREATE DATABASE myproject<span class="token punctuation">;</span>
+</code></pre>
+<pre class="language-bash"><code class="language-bash">CREATE <span class="token environment constant">USER</span> myprojectuser WITH PASSWORD <span class="token string">'password'</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li><strong>Django Specific Settings:</strong></li>
+</ul>
+<pre class="language-bash"><code class="language-bash">ALTER ROLE myprojectuser SET client_encoding TO <span class="token string">'utf8'</span><span class="token punctuation">;</span>
+</code></pre>
+<pre class="language-bash"><code class="language-bash">ALTER ROLE myprojectuser SET default_transaction_isolation TO <span class="token string">'read committed'</span><span class="token punctuation">;</span>
+</code></pre>
+<pre class="language-bash"><code class="language-bash">ALTER ROLE myprojectuser SET timezone TO <span class="token string">'UTC'</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>Grant the created user to modify the created database.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash">GRANT ALL PRIVILEGES ON DATABASE myproject TO myprojectuser<span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>Exit out of postgresql.</li>
+</ul>
+<pre class="language-bash"><code class="language-bash"><span class="token punctuation">\</span>q
+</code></pre>
+<h2>Connecting with django application</h2>
+<ul>
+<li>You can change your databse settings in <code>settings.py</code></li>
+</ul>
+<pre class="language-python"><code class="language-python"><span class="token comment"># For PostgreSQL</span>
+DATABASES <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token string">'default'</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">'ENGINE'</span><span class="token punctuation">:</span> <span class="token string">'django.db.backends.postgresql'</span><span class="token punctuation">,</span>
+        <span class="token comment"># Name of the database.</span>
+        <span class="token string">'NAME'</span><span class="token punctuation">:</span> <span class="token string">'myproject'</span><span class="token punctuation">,</span>
+        <span class="token comment"># Hostname/DomainName/IP of the server.</span>
+        <span class="token string">'HOST'</span><span class="token punctuation">:</span> <span class="token string">'server_ip_here'</span><span class="token punctuation">,</span>
+        <span class="token comment"># User That you've created</span>
+        <span class="token string">'USER'</span><span class="token punctuation">:</span> <span class="token string">'myprojectuser'</span><span class="token punctuation">,</span>
+        <span class="token string">'PORT'</span><span class="token punctuation">:</span> <span class="token string">'5432'</span><span class="token punctuation">,</span>
+        <span class="token comment"># Password that you've created for the user.</span>
+        <span class="token string">'PASSWORD'</span><span class="token punctuation">:</span> <span class="token string">'password'</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>Then install the <code>psycopg2-binary</code> package with <code>pip</code></li>
+</ul>
+<pre class="language-bash"><code class="language-bash">pip <span class="token function">install</span> psycopg2-binary
+</code></pre>
+<ul>
+<li>Now you can use the remote databse.</li>
+</ul>
+</div>
+    <div class="container">
+      <h3>🏷 Tags</h3>
+      <div>
+        
+        <span class="tag"> Bash </span>
+        
+        <span class="tag"> Linux </span>
+        
+        <span class="tag"> Database </span>
+        
+      </div>
+    </div>
+  </body>
+</html>

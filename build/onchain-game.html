@@ -43,15 +43,15 @@
       }
     </style>
     <div class="container">
-<h1>Write a Game on Tezos using Random Number Oracal</h1>
-<h2>What is Random Number Oracal?</h2>
-<p>The random number oracal <a href="https://github.com/asbjornenge/tezos-randomizer">Random Number Oracal</a> is a oracal that generate seed for the random number called entropy off chain using <a href="https://github.com/asbjornenge/tezos-randomizer-service">Randomizer Service</a> off-chain. This entropy is combined with the timestamp to yield a truly random number.</p>
+<h1>Write a Game on Tezos using Random Number Oracle</h1>
+<h2>What is Random Number Oracle?</h2>
+<p>The random number oracle <a href="https://github.com/asbjornenge/tezos-randomizer">Random Number Oracle</a> is a oracle that generate seed for the random number called entropy off chain using <a href="https://github.com/asbjornenge/tezos-randomizer-service">Randomizer Service</a> off-chain. This entropy is combined with the timestamp to yield a truly random number.</p>
 <p>The entropy here is generated using <code>Math.random()</code> in JavaScript. Take a look at the snippet from the <a href="https://github.com/asbjornenge/tezos-randomizer-service">Randomizer Service</a>.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">genRandomNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">floor</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token constant">MAX</span> <span class="token operator">-</span> <span class="token constant">MIN</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token constant">MIN</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Then <code>taquito</code> is used to set this entropy into the main oracal contract after regular interval of times using <code>setTimeOut</code>.</p>
+<p>Then <code>taquito</code> is used to set this entropy into the main oracle contract after regular interval of times using <code>setTimeOut</code>.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">setEntropy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">let</span> contract <span class="token operator">=</span> <span class="token keyword">await</span> toolkit<span class="token punctuation">.</span>contract<span class="token punctuation">.</span><span class="token function">at</span><span class="token punctuation">(</span><span class="token constant">CONTRACT_ADDRESS</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">let</span> rn <span class="token operator">=</span> <span class="token function">genRandomNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -68,7 +68,7 @@
   <span class="token function">setTimeout</span><span class="token punctuation">(</span>setEntropyLoop<span class="token punctuation">,</span> <span class="token constant">INTERVAL</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 </code></pre>
-<p>Then we can use <code>getRandomBetween()</code> from the actual oracal contract to get the random number.</p>
+<p>Then we can use <code>getRandomBetween()</code> from the actual oracle contract to get the random number.</p>
 <pre class="language-py"><code class="language-py"><span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>onchain_view</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">def</span> <span class="token function">getRandomBetween</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">:</span>
     nat <span class="token operator">=</span> self<span class="token punctuation">.</span>hash_to_nat<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>sha256<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>pack<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>now<span class="token punctuation">)</span> <span class="token operator">+</span> self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>entropy<span class="token punctuation">)</span><span class="token punctuation">)</span>
@@ -77,14 +77,14 @@
     res <span class="token operator">=</span> rnd <span class="token operator">+</span> params<span class="token punctuation">.</span>_from
     sp<span class="token punctuation">.</span>result<span class="token punctuation">(</span>res<span class="token punctuation">)</span>
 </code></pre>
-<p>This is how the random number generator oracal works.</p>
+<p>This is how the random number generator oracle works.</p>
 <h2>Write contract for the game.</h2>
-<p>Let's create the Mockup for the Oracal contract to test, because while testing the
-onchain views you need to have a contract that has that view. We've also imported smartpy and created a variable to store the oracal address that we'll use later.</p>
+<p>Let's create the Mockup for the Oracle contract to test, because while testing the
+onchain views you need to have a contract that has that view. We've also imported smartpy and created a variable to store the oracle address that we'll use later.</p>
 <pre class="language-py"><code class="language-py"><span class="token keyword">import</span> smartpy <span class="token keyword">as</span> sp
-ORACAL_ADDRESS<span class="token operator">=</span>sp<span class="token punctuation">.</span>address<span class="token punctuation">(</span><span class="token string">"KT1F3yK7z7AsYvLdHwiJmFnM8thtTHeuZWTf"</span><span class="token punctuation">)</span>
+ORACLE_ADDRESS<span class="token operator">=</span>sp<span class="token punctuation">.</span>address<span class="token punctuation">(</span><span class="token string">"KT1F3yK7z7AsYvLdHwiJmFnM8thtTHeuZWTf"</span><span class="token punctuation">)</span>
 
-<span class="token keyword">class</span> <span class="token class-name">OracalMockup</span><span class="token punctuation">(</span>sp<span class="token punctuation">.</span>Contract<span class="token punctuation">)</span><span class="token punctuation">:</span>
+<span class="token keyword">class</span> <span class="token class-name">OracleMockup</span><span class="token punctuation">(</span>sp<span class="token punctuation">.</span>Contract<span class="token punctuation">)</span><span class="token punctuation">:</span>
     <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
         self<span class="token punctuation">.</span>init<span class="token punctuation">(</span><span class="token punctuation">)</span>
 
@@ -96,11 +96,11 @@ ORACAL_ADDRESS<span class="token operator">=</span>sp<span class="token punctuat
 <h3>How will our game work ?</h3>
 <p>Any user can call <code>createGame(_name, _money, _user1, _user2)</code> to create a new game with <code>_money</code> as the amount of tezos an user has to pay to play, <code>_user1</code> and <code>_user2</code> are the two users that will be playing the game and <code>_name</code> is the name of the game.</p>
 <p>After creating the game users can call <code>joinGame(_name)</code> to join the game by paying <code>_money</code> amount of tezos.</p>
-<p>After both the players paid the money, anyone of them can call <code>playGame(_name)</code> to play the game which will call the oracal for the random number and based on that the winner will be decided.</p>
+<p>After both the players paid the money, anyone of them can call <code>playGame(_name)</code> to play the game which will call the oracle for the random number and based on that the winner will be decided.</p>
 <h3>Storage of the game contract</h3>
-<p>The storage consist of two things, first thing is the <code>oracalAddress</code> which is the address of the oracal contract and second thing is the <code>matches</code> which is a mapping of the game name to the game information. Take a look below to see the code.</p>
+<p>The storage consist of two things, first thing is the <code>oracleAddress</code> which is the address of the oracle contract and second thing is the <code>matches</code> which is a mapping of the game name to the game information. Take a look below to see the code.</p>
 <pre class="language-py"><code class="language-py">self<span class="token punctuation">.</span>init<span class="token punctuation">(</span>
-    oracalAddress<span class="token operator">=</span>_oracalAddress<span class="token punctuation">,</span>
+    oracleAddress<span class="token operator">=</span>_oracleAddress<span class="token punctuation">,</span>
     matches <span class="token operator">=</span> sp<span class="token punctuation">.</span>big_map<span class="token punctuation">(</span>
         l <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
         tkey<span class="token operator">=</span>sp<span class="token punctuation">.</span>TString<span class="token punctuation">,</span>
@@ -150,7 +150,7 @@ The players of a specific match will call this entry point to pay the match fee.
 </code></pre>
 <ol start="3">
 <li>Play Match entry point
-This will be called by any one of the players of the game to play the game. It will call the call the oracal contract to get the random number and based on that the winner will be decided.</li>
+This will be called by any one of the players of the game to play the game. It will call the call the oracle contract to get the random number and based on that the winner will be decided.</li>
 </ol>
 <pre class="language-py"><code class="language-py"><span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>entry_point</span>
 <span class="token keyword">def</span> <span class="token function">playGame</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> _name<span class="token punctuation">)</span><span class="token punctuation">:</span>
@@ -176,10 +176,10 @@ This will be called by any one of the players of the game to play the game. It w
     <span class="token comment"># game give all the money to one user.</span>
     randomNo <span class="token operator">=</span> sp<span class="token punctuation">.</span>view<span class="token punctuation">(</span>
             <span class="token string">"getRandomBetween"</span><span class="token punctuation">,</span>
-            self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>oracalAddress<span class="token punctuation">,</span>
+            self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>oracleAddress<span class="token punctuation">,</span>
             sp<span class="token punctuation">.</span>record<span class="token punctuation">(</span>_from<span class="token operator">=</span>sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> _to<span class="token operator">=</span>sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
             sp<span class="token punctuation">.</span>TNat
-        <span class="token punctuation">)</span><span class="token punctuation">.</span>open_some<span class="token punctuation">(</span><span class="token string">'WRONG_ORACAL_CONTRACT'</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">.</span>open_some<span class="token punctuation">(</span><span class="token string">'WRONG_ORACLE_CONTRACT'</span><span class="token punctuation">)</span>
 
     sp<span class="token punctuation">.</span><span class="token keyword">if</span> randomNo <span class="token operator">&lt;=</span> sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
         <span class="token comment"># User1 won</span>
@@ -191,7 +191,7 @@ This will be called by any one of the players of the game to play the game. It w
         sp<span class="token punctuation">.</span>send<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user2<span class="token punctuation">,</span> winnerAmount<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
 </code></pre>
 <p>You can now test this contract with the help of Mockup contract that we've created.</p>
-<pre class="language-py"><code class="language-py">sp<span class="token punctuation">.</span>add_compilation_target<span class="token punctuation">(</span><span class="token string">"Compile"</span><span class="token punctuation">,</span> RandomFeeder<span class="token punctuation">(</span>_oracalAddress<span class="token operator">=</span>ORACAL_ADDRESS<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<pre class="language-py"><code class="language-py">sp<span class="token punctuation">.</span>add_compilation_target<span class="token punctuation">(</span><span class="token string">"Compile"</span><span class="token punctuation">,</span> RandomFeeder<span class="token punctuation">(</span>_oracleAddress<span class="token operator">=</span>ORACLE_ADDRESS<span class="token punctuation">)</span><span class="token punctuation">)</span>
 
 <span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>add_test</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"Test RandomFeeder"</span><span class="token punctuation">)</span>
 <span class="token keyword">def</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
@@ -199,11 +199,11 @@ This will be called by any one of the players of the game to play the game. It w
     user1 <span class="token operator">=</span> sp<span class="token punctuation">.</span>test_account<span class="token punctuation">(</span><span class="token string">"User1"</span><span class="token punctuation">)</span>
     user2 <span class="token operator">=</span> sp<span class="token punctuation">.</span>test_account<span class="token punctuation">(</span><span class="token string">"User2"</span><span class="token punctuation">)</span>
 
-    oracal <span class="token operator">=</span> OracalMockup<span class="token punctuation">(</span><span class="token punctuation">)</span>
-    r <span class="token operator">=</span> RandomFeeder<span class="token punctuation">(</span>_oracalAddress<span class="token operator">=</span>oracal<span class="token punctuation">.</span>address<span class="token punctuation">)</span>
+    oracle <span class="token operator">=</span> OracleMockup<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    r <span class="token operator">=</span> RandomFeeder<span class="token punctuation">(</span>_oracleAddress<span class="token operator">=</span>oracle<span class="token punctuation">.</span>address<span class="token punctuation">)</span>
 
     scenario <span class="token operator">+=</span> r
-    scenario <span class="token operator">+=</span> oracal
+    scenario <span class="token operator">+=</span> oracle
     gameName <span class="token operator">=</span> <span class="token string">"game"</span>
     r<span class="token punctuation">.</span>createMatch<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>record<span class="token punctuation">(</span>_name<span class="token operator">=</span>gameName<span class="token punctuation">,</span> _money<span class="token operator">=</span>sp<span class="token punctuation">.</span>mutez<span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">,</span> _user1<span class="token operator">=</span>user1<span class="token punctuation">.</span>address<span class="token punctuation">,</span> _user2<span class="token operator">=</span>user2<span class="token punctuation">.</span>address<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span>run<span class="token punctuation">(</span>sender<span class="token operator">=</span>user1<span class="token punctuation">)</span>
 
@@ -238,7 +238,7 @@ This will be called by any one of the players of the game to play the game. It w
         
         <span class="tag"> Blockchain </span>
         
-        <span class="tag"> Oracal </span>
+        <span class="tag"> Oracle </span>
         
       </div>
     </div>

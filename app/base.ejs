@@ -13,6 +13,7 @@
       body {
         max-width: 400px;
         margin: 10px auto;
+        padding: 1rem;
       }
       body.dark {
         background-color: black;
@@ -33,6 +34,12 @@
       }
       img {
         max-width: 100%;
+      }
+      [class*="language"] {
+        font-size: 0.8rem;
+      }
+      code {
+        color: green;
       }
     </style>
     <div class="container"><%- content %></div>

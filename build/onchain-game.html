@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="../assets/prism.css" />
+
+    <title>💀 Skull</title>
+  </head>
+  <body class="dark">
+    <style>
+      body {
+        max-width: 400px;
+        margin: 10px auto;
+        padding: 1rem;
+      }
+      body.dark {
+        background-color: black;
+        color: white;
+      }
+      body.dark p {
+        color: rgb(223, 223, 223);
+      }
+      body.dark b {
+        color: white;
+      }
+      a {
+        color: purple;
+      }
+      .tag {
+        padding: 1px 5px;
+        font-style: italic;
+      }
+      img {
+        max-width: 100%;
+      }
+      [class*="language"] {
+        font-size: 0.8rem;
+      }
+      code {
+        color: green;
+      }
+    </style>
+    <div class="container">
+<h1>Write a Game on Tezos using Random Number Oracal</h1>
+<h2>What is Random Number Oracal?</h2>
+<p>The random number oracal <a href="https://github.com/asbjornenge/tezos-randomizer">Random Number Oracal</a> is a oracal that generate seed for the random number called entropy off chain using <a href="https://github.com/asbjornenge/tezos-randomizer-service">Randomizer Service</a> off-chain. This entropy is combined with the timestamp to yield a truly random number.</p>
+<p>The entropy here is generated using <code>Math.random()</code> in JavaScript. Take a look at the snippet from the <a href="https://github.com/asbjornenge/tezos-randomizer-service">Randomizer Service</a>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">genRandomNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">floor</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token constant">MAX</span> <span class="token operator">-</span> <span class="token constant">MIN</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token constant">MIN</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Then <code>taquito</code> is used to set this entropy into the main oracal contract after regular interval of times using <code>setTimeOut</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">setEntropy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> contract <span class="token operator">=</span> <span class="token keyword">await</span> toolkit<span class="token punctuation">.</span>contract<span class="token punctuation">.</span><span class="token function">at</span><span class="token punctuation">(</span><span class="token constant">CONTRACT_ADDRESS</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">let</span> rn <span class="token operator">=</span> <span class="token function">genRandomNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">let</span> op <span class="token operator">=</span> <span class="token keyword">await</span> contract<span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">setEntropy</span><span class="token punctuation">(</span>rn<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> op<span class="token punctuation">.</span><span class="token function">confirmation</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> op<span class="token punctuation">.</span>hash<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> <span class="token function-variable function">setEntropyLoop</span> <span class="token operator">=</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> hash <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">setEntropy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">FAIL</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> e<span class="token punctuation">.</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span>setEntropyLoop<span class="token punctuation">,</span> <span class="token constant">INTERVAL</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Then we can use <code>getRandomBetween()</code> from the actual oracal contract to get the random number.</p>
+<pre class="language-py"><code class="language-py"><span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>onchain_view</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">def</span> <span class="token function">getRandomBetween</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    nat <span class="token operator">=</span> self<span class="token punctuation">.</span>hash_to_nat<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>sha256<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>pack<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>now<span class="token punctuation">)</span> <span class="token operator">+</span> self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>entropy<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    __from <span class="token operator">=</span> params<span class="token punctuation">.</span>_to <span class="token operator">-</span> params<span class="token punctuation">.</span>_from <span class="token operator">+</span> <span class="token number">1</span>
+    rnd <span class="token operator">=</span> nat <span class="token operator">%</span> sp<span class="token punctuation">.</span>as_nat<span class="token punctuation">(</span>__from<span class="token punctuation">)</span>
+    res <span class="token operator">=</span> rnd <span class="token operator">+</span> params<span class="token punctuation">.</span>_from
+    sp<span class="token punctuation">.</span>result<span class="token punctuation">(</span>res<span class="token punctuation">)</span>
+</code></pre>
+<p>This is how the random number generator oracal works.</p>
+<h2>Write contract for the game.</h2>
+<p>Let's create the Mockup for the Oracal contract to test, because while testing the
+onchain views you need to have a contract that has that view. We've also imported smartpy and created a variable to store the oracal address that we'll use later.</p>
+<pre class="language-py"><code class="language-py"><span class="token keyword">import</span> smartpy <span class="token keyword">as</span> sp
+ORACAL_ADDRESS<span class="token operator">=</span>sp<span class="token punctuation">.</span>address<span class="token punctuation">(</span><span class="token string">"KT1F3yK7z7AsYvLdHwiJmFnM8thtTHeuZWTf"</span><span class="token punctuation">)</span>
+
+<span class="token keyword">class</span> <span class="token class-name">OracalMockup</span><span class="token punctuation">(</span>sp<span class="token punctuation">.</span>Contract<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>init<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>onchain_view</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">def</span> <span class="token function">getRandomBetween</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        sp<span class="token punctuation">.</span>set_type<span class="token punctuation">(</span>params<span class="token punctuation">,</span> sp<span class="token punctuation">.</span>TRecord<span class="token punctuation">(</span>_from<span class="token operator">=</span>sp<span class="token punctuation">.</span>TNat<span class="token punctuation">,</span> _to<span class="token operator">=</span>sp<span class="token punctuation">.</span>TNat<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        sp<span class="token punctuation">.</span>result<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<h3>How will our game work ?</h3>
+<p>Any user can call <code>createGame(_name, _money, _user1, _user2)</code> to create a new game with <code>_money</code> as the amount of tezos an user has to pay to play, <code>_user1</code> and <code>_user2</code> are the two users that will be playing the game and <code>_name</code> is the name of the game.</p>
+<p>After creating the game users can call <code>joinGame(_name)</code> to join the game by paying <code>_money</code> amount of tezos.</p>
+<p>After both the players paid the money, anyone of them can call <code>playGame(_name)</code> to play the game which will call the oracal for the random number and based on that the winner will be decided.</p>
+<h3>Storage of the game contract</h3>
+<p>The storage consist of two things, first thing is the <code>oracalAddress</code> which is the address of the oracal contract and second thing is the <code>matches</code> which is a mapping of the game name to the game information. Take a look below to see the code.</p>
+<pre class="language-py"><code class="language-py">self<span class="token punctuation">.</span>init<span class="token punctuation">(</span>
+    oracalAddress<span class="token operator">=</span>_oracalAddress<span class="token punctuation">,</span>
+    matches <span class="token operator">=</span> sp<span class="token punctuation">.</span>big_map<span class="token punctuation">(</span>
+        l <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        tkey<span class="token operator">=</span>sp<span class="token punctuation">.</span>TString<span class="token punctuation">,</span>
+        tvalue<span class="token operator">=</span>sp<span class="token punctuation">.</span>TRecord<span class="token punctuation">(</span>
+            money<span class="token operator">=</span>sp<span class="token punctuation">.</span>TMutez<span class="token punctuation">,</span>
+            user1<span class="token operator">=</span>sp<span class="token punctuation">.</span>TAddress<span class="token punctuation">,</span>
+            user1Paid<span class="token operator">=</span>sp<span class="token punctuation">.</span>TBool<span class="token punctuation">,</span>
+            user2<span class="token operator">=</span>sp<span class="token punctuation">.</span>TAddress<span class="token punctuation">,</span>
+            user2Paid<span class="token operator">=</span>sp<span class="token punctuation">.</span>TBool<span class="token punctuation">,</span>
+            winner<span class="token operator">=</span>sp<span class="token punctuation">.</span>TOption<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>TAddress<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>The various entrypoints are as follows.</p>
+<ol>
+<li>Create Game entry point</li>
+</ol>
+<pre class="language-py"><code class="language-py"><span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>entry_point</span>
+<span class="token keyword">def</span> <span class="token function">createMatch</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> _name<span class="token punctuation">,</span> _money<span class="token punctuation">,</span> _user1<span class="token punctuation">,</span> _user2<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    matchData <span class="token operator">=</span> sp<span class="token punctuation">.</span>local<span class="token punctuation">(</span><span class="token string">'matchData'</span><span class="token punctuation">,</span> sp<span class="token punctuation">.</span>record<span class="token punctuation">(</span>
+            money<span class="token operator">=</span>_money<span class="token punctuation">,</span>
+            user1<span class="token operator">=</span>_user1<span class="token punctuation">,</span>
+            user1Paid<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            user2<span class="token operator">=</span>_user2<span class="token punctuation">,</span>
+            user2Paid<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            winner<span class="token operator">=</span>sp<span class="token punctuation">.</span>none
+        <span class="token punctuation">)</span><span class="token punctuation">)</span>
+    self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span> <span class="token operator">=</span> matchData<span class="token punctuation">.</span>value
+</code></pre>
+<ol start="2">
+<li>Pay Match Fee entry point
+The players of a specific match will call this entry point to pay the match fee.</li>
+</ol>
+<pre class="language-py"><code class="language-py"><span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>entry_point</span>
+<span class="token keyword">def</span> <span class="token function">payMatchFee</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> _name<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    sp<span class="token punctuation">.</span>verify<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">.</span>contains<span class="token punctuation">(</span>_name<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">'MATCH_DOES_NOT_EXIST'</span><span class="token punctuation">)</span>
+    sp<span class="token punctuation">.</span>verify<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>amount <span class="token operator">==</span> self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>money<span class="token punctuation">,</span> <span class="token string">'NOT_REQUIRED_MONEY'</span><span class="token punctuation">)</span>
+
+    sp<span class="token punctuation">.</span><span class="token keyword">if</span> self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user1 <span class="token operator">==</span> sp<span class="token punctuation">.</span>sender<span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user1Paid <span class="token operator">=</span> <span class="token boolean">True</span>
+    sp<span class="token punctuation">.</span><span class="token keyword">else</span><span class="token punctuation">:</span>
+        <span class="token comment"># if the sender who sent the transaction is not user1 then</span>
+        <span class="token comment"># he must be user2, otherwise we'll raise an error.</span>
+        sp<span class="token punctuation">.</span>verify<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user2 <span class="token operator">==</span> sp<span class="token punctuation">.</span>sender<span class="token punctuation">,</span> <span class="token string">'USER_NOT_IN_GAME'</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user2Paid <span class="token operator">=</span> <span class="token boolean">True</span>
+</code></pre>
+<ol start="3">
+<li>Play Match entry point
+This will be called by any one of the players of the game to play the game. It will call the call the oracal contract to get the random number and based on that the winner will be decided.</li>
+</ol>
+<pre class="language-py"><code class="language-py"><span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>entry_point</span>
+<span class="token keyword">def</span> <span class="token function">playGame</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> _name<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    sp<span class="token punctuation">.</span>verify<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">.</span>contains<span class="token punctuation">(</span>_name<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">'MATCH_DOES_NOT_EXIST'</span><span class="token punctuation">)</span>
+    sp<span class="token punctuation">.</span>verify<span class="token punctuation">(</span>
+        <span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user1 <span class="token operator">==</span> sp<span class="token punctuation">.</span>sender<span class="token punctuation">)</span> <span class="token operator">|</span>
+        <span class="token string">'USER_NOT_IN_GAME'</span>
+    <span class="token punctuation">)</span>
+    sp<span class="token punctuation">.</span>verify<span class="token punctuation">(</span>
+        <span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user1Paid <span class="token operator">==</span> sp<span class="token punctuation">.</span><span class="token builtin">bool</span><span class="token punctuation">(</span><span class="token boolean">True</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span>
+        <span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user2Paid <span class="token operator">==</span> sp<span class="token punctuation">.</span><span class="token builtin">bool</span><span class="token punctuation">(</span><span class="token boolean">True</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token string">'USERS_HAVE_NOT_PAID_MONEY'</span>
+    <span class="token punctuation">)</span>
+
+    <span class="token comment"># Calculate winnerAmount</span>
+    winnerAmount <span class="token operator">=</span> sp<span class="token punctuation">.</span>local<span class="token punctuation">(</span><span class="token string">'winnerAmount'</span><span class="token punctuation">,</span>
+        sp<span class="token punctuation">.</span>utils<span class="token punctuation">.</span>nat_to_mutez<span class="token punctuation">(</span>
+            sp<span class="token punctuation">.</span>utils<span class="token punctuation">.</span>mutez_to_nat<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>money<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+
+    <span class="token comment"># Call the oracle and get the random no and end the</span>
+    <span class="token comment"># game give all the money to one user.</span>
+    randomNo <span class="token operator">=</span> sp<span class="token punctuation">.</span>view<span class="token punctuation">(</span>
+            <span class="token string">"getRandomBetween"</span><span class="token punctuation">,</span>
+            self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>oracalAddress<span class="token punctuation">,</span>
+            sp<span class="token punctuation">.</span>record<span class="token punctuation">(</span>_from<span class="token operator">=</span>sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> _to<span class="token operator">=</span>sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            sp<span class="token punctuation">.</span>TNat
+        <span class="token punctuation">)</span><span class="token punctuation">.</span>open_some<span class="token punctuation">(</span><span class="token string">'WRONG_ORACAL_CONTRACT'</span><span class="token punctuation">)</span>
+
+    sp<span class="token punctuation">.</span><span class="token keyword">if</span> randomNo <span class="token operator">&lt;=</span> sp<span class="token punctuation">.</span>nat<span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment"># User1 won</span>
+        self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>winner <span class="token operator">=</span> sp<span class="token punctuation">.</span>some<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user1<span class="token punctuation">)</span>
+        sp<span class="token punctuation">.</span>send<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user1<span class="token punctuation">,</span> winnerAmount<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
+    sp<span class="token punctuation">.</span><span class="token keyword">else</span><span class="token punctuation">:</span>
+        <span class="token comment"># User2 won</span>
+        self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>winner <span class="token operator">=</span> sp<span class="token punctuation">.</span>some<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user2<span class="token punctuation">)</span>
+        sp<span class="token punctuation">.</span>send<span class="token punctuation">(</span>self<span class="token punctuation">.</span>data<span class="token punctuation">.</span>matches<span class="token punctuation">[</span>_name<span class="token punctuation">]</span><span class="token punctuation">.</span>user2<span class="token punctuation">,</span> winnerAmount<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
+</code></pre>
+<p>You can now test this contract with the help of Mockup contract that we've created.</p>
+<pre class="language-py"><code class="language-py">sp<span class="token punctuation">.</span>add_compilation_target<span class="token punctuation">(</span><span class="token string">"Compile"</span><span class="token punctuation">,</span> RandomFeeder<span class="token punctuation">(</span>_oracalAddress<span class="token operator">=</span>ORACAL_ADDRESS<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token decorator annotation punctuation">@sp<span class="token punctuation">.</span>add_test</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"Test RandomFeeder"</span><span class="token punctuation">)</span>
+<span class="token keyword">def</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    scenario <span class="token operator">=</span> sp<span class="token punctuation">.</span>test_scenario<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    user1 <span class="token operator">=</span> sp<span class="token punctuation">.</span>test_account<span class="token punctuation">(</span><span class="token string">"User1"</span><span class="token punctuation">)</span>
+    user2 <span class="token operator">=</span> sp<span class="token punctuation">.</span>test_account<span class="token punctuation">(</span><span class="token string">"User2"</span><span class="token punctuation">)</span>
+
+    oracal <span class="token operator">=</span> OracalMockup<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    r <span class="token operator">=</span> RandomFeeder<span class="token punctuation">(</span>_oracalAddress<span class="token operator">=</span>oracal<span class="token punctuation">.</span>address<span class="token punctuation">)</span>
+
+    scenario <span class="token operator">+=</span> r
+    scenario <span class="token operator">+=</span> oracal
+    gameName <span class="token operator">=</span> <span class="token string">"game"</span>
+    r<span class="token punctuation">.</span>createMatch<span class="token punctuation">(</span>sp<span class="token punctuation">.</span>record<span class="token punctuation">(</span>_name<span class="token operator">=</span>gameName<span class="token punctuation">,</span> _money<span class="token operator">=</span>sp<span class="token punctuation">.</span>mutez<span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">,</span> _user1<span class="token operator">=</span>user1<span class="token punctuation">.</span>address<span class="token punctuation">,</span> _user2<span class="token operator">=</span>user2<span class="token punctuation">.</span>address<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span>run<span class="token punctuation">(</span>sender<span class="token operator">=</span>user1<span class="token punctuation">)</span>
+
+    r<span class="token punctuation">.</span>payMatchFee<span class="token punctuation">(</span>gameName<span class="token punctuation">)</span><span class="token punctuation">.</span>run<span class="token punctuation">(</span>sender<span class="token operator">=</span>user1<span class="token punctuation">.</span>address<span class="token punctuation">,</span> amount<span class="token operator">=</span>sp<span class="token punctuation">.</span>mutez<span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    r<span class="token punctuation">.</span>payMatchFee<span class="token punctuation">(</span>gameName<span class="token punctuation">)</span><span class="token punctuation">.</span>run<span class="token punctuation">(</span>sender<span class="token operator">=</span>user2<span class="token punctuation">.</span>address<span class="token punctuation">,</span> amount<span class="token operator">=</span>sp<span class="token punctuation">.</span>mutez<span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    r<span class="token punctuation">.</span>playGame<span class="token punctuation">(</span>gameName<span class="token punctuation">)</span><span class="token punctuation">.</span>run<span class="token punctuation">(</span>sender<span class="token operator">=</span>user1<span class="token punctuation">)</span>
+</code></pre>
+<h3>Deploying the contract.</h3>
+<p>You can directly deploy the contract with smartpy cli with these steps.</p>
+<ol>
+<li>Compiling the contract.</li>
+</ol>
+<pre class="language-bash"><code class="language-bash">smartpy compile ./game.py ./output --html
+</code></pre>
+<ol start="2">
+<li>For deploying the contract.</li>
+</ol>
+<pre class="language-bash"><code class="language-bash">smartpy originate-contract <span class="token punctuation">\</span>
+    --code ./output/Compile/step_000_cont_0_contract.tz <span class="token punctuation">\</span>
+    --storage ./output/Compile/step_000_cont_0_storage.tz <span class="token punctuation">\</span>
+    --rpc https://hangzhounet.smartpy.io/
+</code></pre>
+<p>Now, you can use the better-call.dev to interact with this contract.</p>
+<h3>How to build the UI ?</h3>
+<p>Well, you can use the <code>taquito</code> library to create it, I haven't done that for this tutorial but you can take it as an exercise. In case you completed it you can share it on twitter and tag me <code>@vivekascoder</code>. :)</p>
+</div>
+    <div class="container">
+      <h3>🏷 Tags</h3>
+      <div>
+        
+        <span class="tag"> Tezos </span>
+        
+        <span class="tag"> Blockchain </span>
+        
+        <span class="tag"> Oracal </span>
+        
+      </div>
+    </div>
+  </body>
+</html>
